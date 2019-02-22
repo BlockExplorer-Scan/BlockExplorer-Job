@@ -54,7 +54,7 @@ public class StorageJob {
     @Autowired
     Web3j web3j;
 
-    @Scheduled(fixedRate = 10000 * 10)
+    @Scheduled(fixedRate = 1000 * 10000000)
     public void countTokenAccount() {
         logger.info(" joon -- StorageJob - erc20  - start ");
         try {
@@ -107,7 +107,7 @@ public class StorageJob {
                             token.getKey(), terms.getBuckets().size(), entry.getKey().toString(), balance);
 
                     //处理balance
-                    BigDecimal percentage = StorageJob.getPercentage(token.getKey().toString(), balance);
+                    BigDecimal percentage = getPercentage(token.getKey().toString(), balance);
 
                     /**
                      * 以下是插入到新的索引表中 （待处理）
@@ -129,6 +129,8 @@ public class StorageJob {
                         client.prepareUpdate();
                         logger.info("[ERC20Token统计信息]存入ES成功...");
 
+
+
                     }catch (IOException e){
                         e.printStackTrace();
                     }
@@ -136,6 +138,9 @@ public class StorageJob {
             }
 
             logger.info(" joon -- StorageJob - erc20  - end ");
+
+            //开始删除前一天数据
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -145,7 +150,7 @@ public class StorageJob {
     /**
      * 查询代币余额
      */
-    public static BigInteger getTokenBalance(Web3j web3j, String fromAddress, String contractAddress) {
+    public BigInteger getTokenBalance(Web3j web3j, String fromAddress, String contractAddress) {
 
         BigInteger balanceValue = BigInteger.ZERO;
 
@@ -171,15 +176,21 @@ public class StorageJob {
      * 统计百分比
      */
 
-    public static BigDecimal getPercentage (String contractAddress, BigInteger tokenBalance){
-        Web3j web3 = Web3j.build(new HttpService("http://n8.ledx.xyz"));
+    public BigDecimal getPercentage (String contractAddress, BigInteger tokenBalance){
+//        Web3j web3 = Web3j.build(new HttpService("http://n8.ledx.xyz"));
 
-        BigInteger tokenTotalSupply = CommonUtils.getTokenTotalSupply(web3, contractAddress);
+        BigInteger tokenTotalSupply = CommonUtils.getTokenTotalSupply(web3j, contractAddress);
         BigDecimal tokenTotalSupply1 =new BigDecimal(tokenTotalSupply);
 
         BigDecimal tokenBalance1 =new BigDecimal(tokenBalance);
-        BigDecimal divide = tokenBalance1.divide(tokenTotalSupply1, 6, BigDecimal.ROUND_HALF_UP);
+        if (tokenTotalSupply1.toString() == "0") {
+            return BigDecimal.ZERO;
+        } else {
+            BigDecimal divide = tokenBalance1.divide(tokenTotalSupply1, 6, BigDecimal.ROUND_HALF_UP);
+            return divide;
+        }
 
-        return divide;
+
+
     }
 }
