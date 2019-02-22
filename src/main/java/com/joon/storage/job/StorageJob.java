@@ -166,7 +166,7 @@ public class StorageJob {
             List<Type> results = FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters());
             balanceValue = (BigInteger) results.get(0).getValue();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return balanceValue;
