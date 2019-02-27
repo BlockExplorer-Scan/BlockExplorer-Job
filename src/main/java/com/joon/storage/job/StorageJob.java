@@ -113,12 +113,13 @@ public class StorageJob {
                      * 以下是插入到新的索引表中 （待处理）
                      */
 
+
                     try (
                             XContentBuilder content = XContentFactory.jsonBuilder().startObject()
                                     .field("erc20name", token.getKey())
                                     .field("address", entry.getKey().toString())
                                     .field("addressNumber", terms.getBuckets().size())
-                                    .field("quantity", balance.toString())
+                                    .field("quantity", balance.doubleValue())
                                     .field("percentage", percentage.doubleValue())
                                     .endObject())
                     {
