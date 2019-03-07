@@ -14,6 +14,7 @@ import org.web3j.protocol.core.methods.response.EthCall;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -90,6 +91,20 @@ public class CommonUtils {
             e.printStackTrace();
         }
         return decimal;
+    }
+
+    public static String getCurrentTime(){
+
+        long currentTimeMillis = System.currentTimeMillis();
+        String format = new SimpleDateFormat("yyyy-MM-dd").format(currentTimeMillis);
+        return format;
+    }
+
+    public static String getLastTime(){
+
+        long l = System.currentTimeMillis() - 86400000;
+        String format = new SimpleDateFormat("yyyy-MM-dd").format(l);
+        return format;
     }
 
 

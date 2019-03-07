@@ -8,7 +8,10 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -54,7 +57,8 @@ public class StorageJob {
     @Autowired
     Web3j web3j;
 
-    @Scheduled(fixedRate = 1000 * 10000000)
+    //@Scheduled(fixedRate = 1000 * 10000000)
+    @Scheduled(cron="0 41 16 * * ?")
     public void countTokenAccount() {
         logger.info(" joon -- StorageJob - erc20  - start ");
         try {
@@ -113,7 +117,6 @@ public class StorageJob {
                      * 以下是插入到新的索引表中 （待处理）
                      */
 
-
                     try (
                             XContentBuilder content = XContentFactory.jsonBuilder().startObject()
                                     .field("erc20name", token.getKey())
@@ -121,6 +124,7 @@ public class StorageJob {
                                     .field("addressNumber", terms.getBuckets().size())
                                     .field("quantity", balance.doubleValue())
                                     .field("percentage", percentage.doubleValue())
+                                    .field("time", CommonUtils.getCurrentTime())
                                     .endObject())
                     {
                         IndexResponse response2 = client.prepareIndex("erc20token","data")
@@ -130,17 +134,37 @@ public class StorageJob {
                         client.prepareUpdate();
                         logger.info("[ERC20Token统计信息]存入ES成功...");
 
+                    }catch (Exception e){
+                        //删除当天数据
+                        DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
+                                // 根据条件个数添加filter语句
+                                .filter(QueryBuilders.matchQuery("time", CommonUtils.getCurrentTime()))
+                                .source("erc20token")
+                                .get();
+                        //当天数据已删除
+                        logger.info("ERC20Token Holders存入ES异常，当天统计数据已删除");
+                        return;
 
-
-                    }catch (IOException e){
-                        e.printStackTrace();
                     }
                 }
             }
 
             logger.info(" joon -- StorageJob - erc20  - end ");
+            logger.info(CommonUtils.getCurrentTime()+" Holders数据统计完成。");
 
             //开始删除前一天数据
+
+            String lastTime = CommonUtils.getLastTime();
+
+            BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
+                    // 根据条件个数添加filter语句
+                    .filter(QueryBuilders.matchQuery("time", lastTime))
+                    .source("erc20token")
+                    .get();
+            long deleted = response.getDeleted();
+
+            logger.info(lastTime+" 的数据删除完成，数量为：" + deleted + "条。");
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -190,8 +214,6 @@ public class StorageJob {
             BigDecimal divide = tokenBalance1.divide(tokenTotalSupply1, 6, BigDecimal.ROUND_HALF_UP);
             return divide;
         }
-
-
 
     }
 }
