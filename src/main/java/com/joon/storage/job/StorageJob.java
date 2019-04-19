@@ -41,6 +41,9 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.joon.storage.entity.EsTableEnum.ERC20;
+import static com.joon.storage.entity.EsTableEnum.ERC20TOKEN;
+
 /**
  * @program storage-job
  * @author: joon.h
@@ -58,7 +61,8 @@ public class StorageJob {
     Web3j web3j;
 
     //@Scheduled(fixedRate = 1000 * 10000000)
-    @Scheduled(cron="0 41 16 * * ?")
+    @Scheduled(cron="0 16 10 * * ?")
+    //@Scheduled(cron="0 0 16 * * ?")
     public void countTokenAccount() {
         logger.info(" joon -- StorageJob - erc20  - start ");
         try {
@@ -73,7 +77,7 @@ public class StorageJob {
             sourceBuilderToken.aggregation(termsAggregationBuilderToken);
             sourceBuilderToken.query(boolQueryBuilderToken);
             //查询索引对象
-            SearchRequest searchRequestToken = new SearchRequest("erc20");
+            SearchRequest searchRequestToken = new SearchRequest(ERC20.toString());
             searchRequestToken.types("data");
             searchRequestToken.source(sourceBuilderToken);
             SearchResponse responseToken = client.search(searchRequestToken).get();
@@ -94,7 +98,7 @@ public class StorageJob {
                 sourceBuilder.query(boolQueryBuilder);
 
                 //查询索引对象
-                SearchRequest searchRequest = new SearchRequest("erc20");
+                SearchRequest searchRequest = new SearchRequest(ERC20.toString());
                 searchRequest.types("data");
                 searchRequest.source(sourceBuilder);
                 SearchResponse response = client.search(searchRequest).get();
@@ -127,7 +131,7 @@ public class StorageJob {
                                     .field("time", CommonUtils.getCurrentTime())
                                     .endObject())
                     {
-                        IndexResponse response2 = client.prepareIndex("erc20token","data")
+                        IndexResponse response2 = client.prepareIndex(ERC20TOKEN.toString(),"data")
                                 .setSource(content)
                                 .get();
 
@@ -139,7 +143,7 @@ public class StorageJob {
                         DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
                                 // 根据条件个数添加filter语句
                                 .filter(QueryBuilders.matchQuery("time", CommonUtils.getCurrentTime()))
-                                .source("erc20token")
+                                .source(ERC20TOKEN.toString())
                                 .get();
                         //当天数据已删除
                         logger.info("ERC20Token Holders存入ES异常，当天统计数据已删除");
@@ -159,7 +163,7 @@ public class StorageJob {
             BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
                     // 根据条件个数添加filter语句
                     .filter(QueryBuilders.matchQuery("time", lastTime))
-                    .source("erc20token")
+                    .source(ERC20TOKEN.toString())
                     .get();
             long deleted = response.getDeleted();
 

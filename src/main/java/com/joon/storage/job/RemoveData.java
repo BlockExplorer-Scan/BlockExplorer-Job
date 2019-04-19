@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
 
+import static com.joon.storage.entity.EsTableEnum.ERC20TOKEN;
+
 /**
  * @author soobeenwong
  * @date 2019-02-22 5:09 PM
@@ -38,7 +40,8 @@ public class RemoveData {
         BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
                 // 根据条件个数添加filter语句
                 .filter(QueryBuilders.matchQuery("time", lastTime))
-                .source("erc20token")
+                //.source("erc20token")
+                .source(ERC20TOKEN.toString())
                 .get();
         long deleted = response.getDeleted();
 
