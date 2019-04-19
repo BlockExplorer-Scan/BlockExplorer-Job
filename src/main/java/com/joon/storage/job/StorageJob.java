@@ -96,6 +96,7 @@ public class StorageJob {
                 TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("group_to_count").field("to");
                 sourceBuilder.aggregation(termsAggregationBuilder);
                 sourceBuilder.query(boolQueryBuilder);
+                sourceBuilder.size(1000);
 
                 //查询索引对象
                 SearchRequest searchRequest = new SearchRequest(ERC20.toString());
