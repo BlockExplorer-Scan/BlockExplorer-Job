@@ -93,10 +93,9 @@ public class StorageJob {
                 boolQueryBuilder.must(new TermQueryBuilder("address", token.getKey()));
                 //聚合处理
                 SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-                TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("group_to_count").field("to");
+                TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("group_to_count").field("to").size(1000);
                 sourceBuilder.aggregation(termsAggregationBuilder);
                 sourceBuilder.query(boolQueryBuilder);
-                sourceBuilder.size(1000);
 
                 //查询索引对象
                 SearchRequest searchRequest = new SearchRequest(ERC20.toString());
