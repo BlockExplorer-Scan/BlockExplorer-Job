@@ -33,9 +33,7 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthCall;
-import org.web3j.protocol.http.HttpService;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -61,11 +59,13 @@ public class StorageJob {
     Web3j web3j;
 
     //@Scheduled(fixedRate = 1000 * 10000000)
-    @Scheduled(cron="0 16 10 * * ?")
-    //@Scheduled(cron="0 0 16 * * ?")
+    @Scheduled(cron="0 0 0 * * ?") //UTC时间每天凌晨执行一次
+    //@Scheduled( fixedRate = 1000*60*100)
     public void countTokenAccount() {
         logger.info(" joon -- StorageJob - erc20  - start ");
+
         try {
+
             /**
              * 统计出共有多少代币
              */
@@ -93,10 +93,9 @@ public class StorageJob {
                 boolQueryBuilder.must(new TermQueryBuilder("address", token.getKey()));
                 //聚合处理
                 SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-                TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("group_to_count").field("to");
+                TermsAggregationBuilder termsAggregationBuilder = AggregationBuilders.terms("group_to_count").field("to").size(1000);
                 sourceBuilder.aggregation(termsAggregationBuilder);
                 sourceBuilder.query(boolQueryBuilder);
-                sourceBuilder.size(1000);
 
                 //查询索引对象
                 SearchRequest searchRequest = new SearchRequest(ERC20.toString());
@@ -157,18 +156,21 @@ public class StorageJob {
             logger.info(" joon -- StorageJob - erc20  - end ");
             logger.info(CommonUtils.getCurrentTime()+" Holders数据统计完成。");
 
-            //开始删除前一天数据
+            //开始删除旧数据
 
-            String lastTime = CommonUtils.getLastTime();
+            //String lastTime = CommonUtils.getLastTime();
+
+            BoolQueryBuilder bool = new BoolQueryBuilder();
+            bool.mustNot(new TermQueryBuilder("time", CommonUtils.getCurrentTime()));
 
             BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client)
                     // 根据条件个数添加filter语句
-                    .filter(QueryBuilders.matchQuery("time", lastTime))
+                    .filter(bool)
                     .source(ERC20TOKEN.toString())
                     .get();
             long deleted = response.getDeleted();
 
-            logger.info(lastTime+" 的数据删除完成，数量为：" + deleted + "条。");
+            logger.info("旧的数据删除完成，数量为：" + deleted + "条。");
 
 
         } catch (Exception e) {
@@ -207,7 +209,7 @@ public class StorageJob {
      */
 
     public BigDecimal getPercentage (String contractAddress, BigInteger tokenBalance){
-//        Web3j web3 = Web3j.build(new HttpService("http://n8.ledx.xyz"));
+        //Web3j web3 = Web3j.build(new HttpService("http://n8.ledx.xyz"));
 
         BigInteger tokenTotalSupply = CommonUtils.getTokenTotalSupply(web3j, contractAddress);
         BigDecimal tokenTotalSupply1 =new BigDecimal(tokenTotalSupply);
