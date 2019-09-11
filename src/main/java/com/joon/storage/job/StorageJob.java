@@ -215,7 +215,8 @@ public class StorageJob {
         BigDecimal tokenTotalSupply1 =new BigDecimal(tokenTotalSupply);
 
         BigDecimal tokenBalance1 =new BigDecimal(tokenBalance);
-        if (tokenTotalSupply1.toString() == "0") {
+        //已优化
+        if (tokenTotalSupply1.toString().equals("0")) {
             return BigDecimal.ZERO;
         } else {
             BigDecimal divide = tokenBalance1.divide(tokenTotalSupply1, 6, BigDecimal.ROUND_HALF_UP);

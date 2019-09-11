@@ -38,6 +38,12 @@ public class CommonUtils {
     }
 
 
+    /**
+     * @date 2019-9-10
+     * @param web3j
+     * @param contractAddress
+     * @return
+     */
     public static BigInteger getTokenTotalSupply(Web3j web3j, String contractAddress) {
 
         BigInteger totalSupply = BigInteger.ZERO;
@@ -53,9 +59,13 @@ public class CommonUtils {
 
             EthCall ethCall = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).sendAsync().get();
             List<Type> results = FunctionReturnDecoder.decode(ethCall.getValue(), function.getOutputParameters());
-            totalSupply = (BigInteger) results.get(0).getValue();
 
-            return totalSupply;
+            if (results.size() > 0) {
+                totalSupply = (BigInteger) results.get(0).getValue();
+
+                return totalSupply;
+            }
+            return BigInteger.ZERO;
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
