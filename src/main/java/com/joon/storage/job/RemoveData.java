@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.joon.storage.entity.EsTableEnum.ERC20TOKEN;
 
 /**
- * @author soobeenwong
+ *
  * @date 2019-02-22 5:09 PM
  * @desc 定时任务：删除前一天统计的Holds数据
  */

@@ -44,7 +44,6 @@ import static com.joon.storage.entity.EsTableEnum.ERC20TOKEN;
 
 /**
  * @program storage-job
- * @author: joon.h
  * @create: 2019/02/20 14:50
  */
 @Component
@@ -209,7 +208,6 @@ public class StorageJob {
      */
 
     public BigDecimal getPercentage (String contractAddress, BigInteger tokenBalance){
-        //Web3j web3 = Web3j.build(new HttpService("http://n8.ledx.xyz"));
 
         BigInteger tokenTotalSupply = CommonUtils.getTokenTotalSupply(web3j, contractAddress);
         BigDecimal tokenTotalSupply1 =new BigDecimal(tokenTotalSupply);
