@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="BlockExplorer-Job:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>BlockExplorer-Job</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="BlockExplorer-Job-1.0.2.war">
+      <element id="artifact" artifact-name="BlockExplorer-Job:war exploded" />
+    </root>
+  </artifact>
+</component>
